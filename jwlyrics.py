@@ -11,9 +11,11 @@ __SESSION.headers.update({'User-Agent': 'lyrics'})
 
 def get_lyrics(artist, title):
     """Get and return the lyrics for the given song.
+    Returns False if there are no lyrics (it's instrumental).
+    TODO:
     Raises an IOError if the lyrics couldn't be found.
     Raises an IndexError if there is no lyrics tag.
-    Returns False if there are no lyrics (it's instrumental)."""
+    """
 
     soup = __get_soup(
         __lyricwikiurl(artist, title), fail=True)
