@@ -1,24 +1,45 @@
-import requests
+import re
+
 from bs4 import BeautifulSoup
+import requests
+import urllib.parse
 
 """
 Based on http://github.com/tremby/py-lyrics
 """
 
-__SESSION = requests.Session()  # use a session for persistence
+# Use a requests session for persistence.
+__SESSION = requests.Session()
 __SESSION.headers.update({'User-Agent': 'lyrics'})
 
 
-def get_lyrics(artist, title):
+def get_artist_lyrics(artist):
+    url = __construct_lyricwiki_url(artist)
+    try:
+        soup = __get_soup(url)
+    except ValueError:
+        print("Sorry, we couldn't find a Wiki for '%s' on LyricWiki." % artist)
+    song_urls = __get_artist_song_links(soup, artist)
+    lyrics = []
+    for url in song_urls:
+        title = __from_lyricwikicase(url.split(":")[2])
+        lyrics.append((title, lyrics))
+
+
+def get_song_lyrics(artist, title):
+    return get_lyrics_from_url(__construct_lyricwiki_url(artist, title))
+
+
+def get_lyrics_from_url(url):
     """Get and return the lyrics for the given song.
     Returns False if there are no lyrics (it's instrumental).
+
     TODO:
     Raises an IOError if the lyrics couldn't be found.
     Raises an IndexError if there is no lyrics tag.
     """
 
-    soup = __get_soup(
-        __lyricwikiurl(artist, title), fail=True)
+    soup = __get_soup(url, fail=True)
 
     try:
         lyricbox = soup.select(".lyricbox")[0]
@@ -37,12 +58,34 @@ def get_lyrics(artist, title):
     return "".join(lyrics).strip()
 
 
+def __get_artist_song_links(soup, artist):
+    song_regex = "^\/wiki\/%s:" % __lyricwikicase(artist)
+    songs = []
+    for elem in soup.find_all("li"):
+        link_tag = elem.find_all("a", href=re.compile(song_regex))
+        if link_tag:
+            link = "http://lyrics.wikia.com" + link_tag[0].get("href")
+            if "edit" not in link:
+                songs.append(link)
+    return songs
+
+
+def __from_lyricwikicase(s):
+    s = s.replace("Less_Than", "<")
+    s = s.replace("Greater_Than", ">")
+    s = s.replace("Number_", "#")
+    s = s.replace("Sharp_", "#")
+    s = s.replace("%27", "'")
+    s = s.replace("_", " ")
+    return urllib.parse.unquote(s)
+
+
 def __lyricwikicase(s):
     """Return a string in LyricWiki case.
+
     Substitutions are performed as described at
     <http://lyrics.wikia.com/LyricWiki:Page_Names>.
-    Essentially that means capitalizing every word and substituting certain
-    characters."""
+    """
 
     words = s.split()
     newwords = []
@@ -51,32 +94,27 @@ def __lyricwikicase(s):
     s = "_".join(newwords)
     s = s.replace("<", "Less_Than")
     s = s.replace(">", "Greater_Than")
-    # FIXME: "Sharp" is also an allowed substitution
+
+    # TODO: Support Sharp_ as a valid substitution for "#".
     s = s.replace("#", "Number_")
     s = s.replace("[", "(")
     s = s.replace("]", ")")
     s = s.replace("{", "(")
     s = s.replace("}", ")")
-    # s = urllib.parse.urlencode([(0, s)])[2:]
     return s
 
 
-def __lyricwikipagename(artist, title):
-    """Return the page name for a set of lyrics given the artist and
-    title"""
-
-    return "%s:%s" % (__lyricwikicase(artist), __lyricwikicase(title))
-
-
-def __lyricwikiurl(artist, title, edit=False):
-    """Return the URL of a LyricWiki page for the given song, or its edit
-    page"""
-
+def __construct_lyricwiki_url(artist, song_title=None, edit=False):
+    """Constructs a LyricWiki URL for an artist or song.
+    """
     base = "http://lyrics.wikia.com/wiki/"
-    pagename = __lyricwikipagename(artist, title)
+    page_name = __lyricwikicase(artist)
+    if song_title:
+        page_name += ":%s" % __lyricwikicase(song_title)
+
     if edit:
-        return base + "index.php?title=%s&action=edit" % pagename
-    return base + pagename
+        return base + "index.php?title=%s&action=edit" % page_name
+    return base + page_name
 
 
 def __get_soup(url, headers=None, cookies=None, timeout=None, fail=True):
