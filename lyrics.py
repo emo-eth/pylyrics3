@@ -19,6 +19,7 @@ def get_artist_lyrics(artist):
         soup = __get_soup(url)
     except ValueError:
         print("Sorry, we couldn't find a Wiki for '%s' on LyricWiki." % artist)
+        return
     song_urls = __get_artist_song_links(soup, artist)
     lyrics = []
     for url in song_urls:
@@ -38,8 +39,14 @@ def get_lyrics_from_url(url):
     Raises an IOError if the lyrics couldn't be found.
     Raises an IndexError if there is no lyrics tag.
     """
-
-    soup = __get_soup(url, fail=True)
+    try:
+        soup = __get_soup(url, fail=True)
+    except ValueError:
+        page_name = __from_lyricwikicase(url.split("/")[-1])
+        artist = page_name.split(":")[0]
+        title = page_name.split(":")[1]
+        print("Ran into an error getting lyrics for '%s' by %s!" % (title, artist))
+        return
 
     try:
         lyricbox = soup.select(".lyricbox")[0]
