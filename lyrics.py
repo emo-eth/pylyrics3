@@ -25,6 +25,7 @@ def get_artist_lyrics(artist):
     for url in song_urls:
         title = __from_lyricwikicase(url.split(":")[2])
         lyrics.append((title, lyrics))
+    return lyrics
 
 
 def get_song_lyrics(artist, title):
