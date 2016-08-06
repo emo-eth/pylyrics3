@@ -5,12 +5,37 @@ from bs4 import BeautifulSoup
 Based on http://github.com/tremby/py-lyrics
 """
 
-JWSOUP_SESSION = requests.Session()  # use a session for persistence
-user_agent = 'lyrics'
-JWSOUP_SESSION.headers.update({'User-Agent': user_agent})
+__SESSION = requests.Session()  # use a session for persistence
+__SESSION.headers.update({'User-Agent': 'lyrics'})
 
 
-def _lyricwikicase(s):
+def get_lyrics(artist, title):
+    """Get and return the lyrics for the given song.
+    Raises an IOError if the lyrics couldn't be found.
+    Raises an IndexError if there is no lyrics tag.
+    Returns False if there are no lyrics (it's instrumental)."""
+
+    soup = __get_soup(
+        __lyricwikiurl(artist, title), fail=True)
+
+    try:
+        lyricbox = soup.select(".lyricbox")[0]
+        # remove script tags
+        [s.extract() for s in lyricbox('script')]
+    except IndexError:
+        return None
+    # look for a sign that it's instrumental
+    if len(soup.select(".lyricbox a[title=\"Instrumental\"]")):
+        return False
+    # prepare output
+    lyrics = []
+    if lyricbox.text is not None:
+        for string in lyricbox.stripped_strings:
+            lyrics.append(string + ' \n ')
+    return "".join(lyrics).strip()
+
+
+def __lyricwikicase(s):
     """Return a string in LyricWiki case.
     Substitutions are performed as described at
     <http://lyrics.wikia.com/LyricWiki:Page_Names>.
@@ -34,55 +59,29 @@ def _lyricwikicase(s):
     return s
 
 
-def _lyricwikipagename(artist, title):
+def __lyricwikipagename(artist, title):
     """Return the page name for a set of lyrics given the artist and
     title"""
 
-    return "%s:%s" % (_lyricwikicase(artist), _lyricwikicase(title))
+    return "%s:%s" % (_lyricwikicase(artist), __lyricwikicase(title))
 
 
-def _lyricwikiurl(artist, title, edit=False):
+def __lyricwikiurl(artist, title, edit=False):
     """Return the URL of a LyricWiki page for the given song, or its edit
     page"""
 
     base = "http://lyrics.wikia.com/wiki/"
-    pagename = _lyricwikipagename(artist, title)
+    pagename = __lyricwikipagename(artist, title)
     if edit:
         return base + "index.php?title=%s&action=edit" % pagename
     return base + pagename
 
 
-def get_lyrics(artist, title):
-    """Get and return the lyrics for the given song.
-    Raises an IOError if the lyrics couldn't be found.
-    Raises an IndexError if there is no lyrics tag.
-    Returns False if there are no lyrics (it's instrumental)."""
-
-    soup = _get_soup(
-        _lyricwikiurl(artist, title), fail=True)
-
-    try:
-        lyricbox = soup.select(".lyricbox")[0]
-        # remove script tags
-        [s.extract() for s in lyricbox('script')]
-    except IndexError:
-        return None
-    # look for a sign that it's instrumental
-    if len(soup.select(".lyricbox a[title=\"Instrumental\"]")):
-        return False
-    # prepare output
-    lyrics = []
-    if lyricbox.text is not None:
-        for string in lyricbox.stripped_strings:
-            lyrics.append(string + ' \n ')
-    return "".join(lyrics).strip()
-
-
-def _get_soup(url, headers=None, cookies=None, timeout=None, fail=True):
-    req = JWSOUP_SESSION.get(
+def __get_soup(url, headers=None, cookies=None, timeout=None, fail=True):
+    req = __SESSION.get(
         url, headers=headers, cookies=cookies, timeout=timeout)
     try:
-        _check_response(req.status_code)
+        __check_response(req.status_code)
         return BeautifulSoup(req.text, 'lxml')
     except AssertionError:
         print('Unable to download url ' + url)
@@ -91,6 +90,6 @@ def _get_soup(url, headers=None, cookies=None, timeout=None, fail=True):
         return BeautifulSoup('', 'lxml')
 
 
-def _check_response(status_code):
+def __check_response(status_code):
     first_digit = status_code // 100
     assert first_digit in {2, 3}
