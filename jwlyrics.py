@@ -65,7 +65,7 @@ def __lyricwikipagename(artist, title):
     """Return the page name for a set of lyrics given the artist and
     title"""
 
-    return "%s:%s" % (_lyricwikicase(artist), __lyricwikicase(title))
+    return "%s:%s" % (__lyricwikicase(artist), __lyricwikicase(title))
 
 
 def __lyricwikiurl(artist, title, edit=False):
