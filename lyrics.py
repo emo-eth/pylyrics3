@@ -21,10 +21,13 @@ def get_artist_lyrics(artist):
         print("Sorry, we couldn't find a Wiki for '%s' on LyricWiki." % artist)
         return
     song_urls = __get_artist_song_links(soup, artist)
-    lyrics = []
+    title_to_lyrics = {}
     for url in song_urls:
         title = __from_lyricwikicase(url.split(":")[2])
-        lyrics.append((title, lyrics))
+        lyrics = get_lyrics_from_url(url)
+        if lyrics:
+            title_to_lyrics[title] = lyrics
+    return title_to_lyrics
 
 
 def get_song_lyrics(artist, title):
@@ -34,7 +37,6 @@ def get_song_lyrics(artist, title):
 def get_lyrics_from_url(url):
     """Get and return the lyrics for the given song.
     Returns False if there are no lyrics (it's instrumental).
-
     TODO:
     Raises an IOError if the lyrics couldn't be found.
     Raises an IndexError if there is no lyrics tag.
@@ -89,7 +91,6 @@ def __from_lyricwikicase(s):
 
 def __lyricwikicase(s):
     """Return a string in LyricWiki case.
-
     Substitutions are performed as described at
     <http://lyrics.wikia.com/LyricWiki:Page_Names>.
     """
