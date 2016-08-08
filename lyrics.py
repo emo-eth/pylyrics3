@@ -1,8 +1,8 @@
 import re
+import urllib.parse
 
 from bs4 import BeautifulSoup
 import requests
-import urllib.parse
 
 """
 Based on http://github.com/tremby/py-lyrics
