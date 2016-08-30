@@ -19,14 +19,15 @@ This module installs
 >>> import pylyrics3
 
 >>> bon_iver_lyrics = pylyrics3.get_artist_lyrics('bon iver')
+
 >>> bon_iver_lyrics.keys()
 dict_keys(['Come Talk To Me', 'Towers', 'Woods', ...)
 >>> bon_iver_lyrics['Skinny Love']
-"Come on skinny love, just last the year \n Pour a little salt, we were never here \n My, my, my, my, my, my, my, my ...""
+"Come on skinny love, just last the year  ...""
 
 >>> pylyrics3.get_song_lyrics('drake', 'hotline bling')
-"You used to call me on my, you used to, you used to \n You used to call me on my cell phone \n Late night when you need my love ...""
+"You used to call me on my, you used to, you used to ...""
 
 >>> pylyrics3.get_lyrics_from_url('http://lyrics.wikia.com/wiki/Lorde:Tennis_Court')
-""Don't you think that it's boring how people talk? \n Making smart with their words again, well, I'm bored ..."
+"Don't you think that it's boring how people talk? ..."
 ```
