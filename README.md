@@ -23,10 +23,10 @@ This module installs
 >>> bon_iver_lyrics.keys()
 dict_keys(['Come Talk To Me', 'Towers', 'Woods', ...)
 >>> bon_iver_lyrics['Skinny Love']
-"Come on skinny love, just last the year  ...""
+"Come on skinny love, just last the year ..."
 
 >>> pylyrics3.get_song_lyrics('drake', 'hotline bling')
-"You used to call me on my, you used to, you used to ...""
+"You used to call me on my, you used to, you used to ..."
 
 >>> pylyrics3.get_lyrics_from_url('http://lyrics.wikia.com/wiki/Lorde:Tennis_Court')
 "Don't you think that it's boring how people talk? ..."
