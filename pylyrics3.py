@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import requests
 
 """
-Based on http://github.com/tremby/py-lyrics
+Loosely based on http://github.com/tremby/py-lyrics - thanks!
 """
 
 # Use a requests session for persistence.
@@ -47,7 +47,8 @@ def get_lyrics_from_url(url):
         page_name = __from_lyricwikicase(url.split("/")[-1])
         artist = page_name.split(":")[0]
         title = page_name.split(":")[1]
-        print("Ran into an error getting lyrics for '%s' by %s!" % (title, artist))
+        print("Ran into an error getting lyrics for '%s' by %s!"
+              % (title, artist))
         return
 
     try:
@@ -71,9 +72,9 @@ def __get_artist_song_links(soup, artist):
     song_regex = "^\/wiki\/%s:" % __lyricwikicase(artist)
     songs = []
     for elem in soup.find_all("li"):
-        link_tag = elem.find_all("a", href=re.compile(song_regex))
+        link_tag = elem.find("a", href=re.compile(song_regex))
         if link_tag:
-            link = "http://lyrics.wikia.com" + link_tag[0].get("href")
+            link = "http://lyrics.wikia.com" + link_tag.get("href")
             if "edit" not in link:
                 songs.append(link)
     return songs
