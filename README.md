@@ -2,12 +2,7 @@
 Lyric scraper very loosely based on py-lyrics, updated for Python 3
 
 # Installation
-Point your terminal to the repo and type `python setup.py install` (if that doesn't work, try `sudo python setup.py install`) (replace `python` with whatever alias you have for Python 3!)
-
-# Requirements
-This module installs
-- [Requests](http://docs.python-requests.org/en/master/user/install/)
-- [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/#installing-beautiful-soup)
+Install with `pip install pylyrics3`
 
 # Usage
 `pylyrics3` has 3 main functions:
