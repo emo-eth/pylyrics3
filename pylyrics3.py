@@ -130,7 +130,11 @@ def __get_soup(url, headers=None, cookies=None, timeout=None, fail=True):
         url, headers=headers, cookies=cookies, timeout=timeout)
     try:
         __check_response(req.status_code)
-        return BeautifulSoup(req.text, 'lxml')
+        # lxml is much speedier than the normal parser, but requires install
+        try:
+            return BeautifulSoup(req.text, 'lxml')
+        except ValueError:
+            return BeautifulSoup(req.text, 'html.parser')
     except AssertionError:
         print('Unable to download url ' + url)
         if fail:
