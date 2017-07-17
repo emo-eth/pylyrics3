@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 from setuptools import setup
+from version import version
 
-version = '0.1.3'
+# version = '1.0.0'
 
 setup(
     name="pylyrics3",
