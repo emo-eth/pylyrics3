@@ -3,15 +3,7 @@
 from setuptools import setup
 from version import version
 
-def load_version(path):
-    with open(path) as fid:
-        for line in fid:
-            if line.startswith('version'):
-                version = line.strip().split('=')[-1][1:-1]
-                return version
-
-
-version = load_version('version.py')
+version = '1.0.2'
 
 setup(
     name="pylyrics3",
