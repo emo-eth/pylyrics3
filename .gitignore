@@ -92,3 +92,5 @@ ENV/
 .vscode/
 *.ipynb
 nb.py
+
+.DS_Store
