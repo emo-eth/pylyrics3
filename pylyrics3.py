@@ -3,6 +3,7 @@ Loosely based on http://github.com/tremby/py-lyrics - thanks!
 '''
 import urllib.parse
 import requests
+from collections import defaultdict
 from bs4 import BeautifulSoup
 
 
@@ -39,12 +40,21 @@ class PyLyrics3(object):
                   % artist)
             return
         if albums:
-            return self.__parse_albums(self.__get_artist_album_links(soup))
+            return self.__parse_albums(self.__get_artist_album_links(soup),
+                                       artist.lower())
 
         song_urls = self.__get_artist_song_links(soup)
         title_to_lyrics = {}
         for url in song_urls:
-            title = self.__parse_song_title(url)
+            try:
+                song_artist, title = self.__parse_song_artist_and_title(url)
+            except IndexError:
+                # when a song is a cover, the link to the original artist gets
+                # picked up by the link css selector
+                continue
+            if artist != song_artist.lower():
+                print(song_artist)
+                continue
             lyrics = self.get_lyrics_from_url(url)
             if lyrics:
                 title_to_lyrics[title] = lyrics
@@ -93,7 +103,7 @@ class PyLyrics3(object):
                 lyrics.append(string + ' \n ')
         return ''.join(lyrics).strip()
 
-    def __parse_albums(self, albums):
+    def __parse_albums(self, albums, artist_name):
         '''Given a collection of album <a> tags, fetch their lyrics
         Params:
             albums: collection - collection of <a> tags, each being a link to
@@ -101,13 +111,19 @@ class PyLyrics3(object):
         Returns:
             Dict with structure {album: {track: lyrics}}: {str: {str: str}}
         '''
-        artist_dict = {}
+        artist_dict = defaultdict(dict)
         for album in albums:
-            title = album.text
+            album_title = album.text
             tracks = self.__parse_multi_disc(self.__get_parent_h2(album))
             urls = [self.__lyric_wiki_url + a.get('href') for a in tracks]
-            artist_dict[title] = {self.__parse_song_title(url):
-                                  self.get_lyrics_from_url(url) for url in urls}
+            for url in urls:
+                try:
+                    artist, track_title = self.__parse_song_artist_and_title(url)
+                except IndexError:
+                    continue
+                if artist_name != artist.lower():
+                    continue
+                artist_dict[album_title][track_title] = self.get_lyrics_from_url(url)
         return artist_dict
 
     # Lyric Wiki helper methods
@@ -177,7 +193,7 @@ class PyLyrics3(object):
         soup = h2_tag.next_sibling
         while soup and soup.name != 'h2':
             if soup.name == 'ol':
-                tracks += soup.select('li a')
+                tracks += soup.select('li b a')
             soup = soup.next_sibling
         return tracks
 
@@ -185,7 +201,7 @@ class PyLyrics3(object):
     def __get_artist_song_links(artist_soup):
         '''Given the soup of an artist page, get <a> tags of all tracks'''
         songs = []
-        for link_tag in artist_soup.select('ol li a'):
+        for link_tag in artist_soup.select('ol li b a'):
             link = PyLyrics3.__lyric_wiki_url + link_tag.get('href')
             songs.append(link)
         return songs
@@ -201,9 +217,16 @@ class PyLyrics3(object):
         return album_a_tag.parent.parent
 
     @staticmethod
-    def __parse_song_title(url):
+    def __parse_song_artist_and_title(url):
         '''Given a LyricWiki encoded url, parse out the song title'''
-        return PyLyrics3._decode_lyricwiki(url.split(':')[2])
+        # unpacking as 3 elements would throw a ValueError rather than an
+        # IndexError, which the other methods catch
+        splits = url.split(':')
+        artist = splits[1]
+        title = splits[2]
+        artist = artist.split('/')[-1]
+        return (PyLyrics3._decode_lyricwiki(artist),
+                PyLyrics3._decode_lyricwiki(title))
 
     # IO Helper methods
 
