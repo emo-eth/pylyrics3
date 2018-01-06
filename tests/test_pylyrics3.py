@@ -25,7 +25,7 @@ class TestPyLyrics3(unittest.TestCase):
         self.assertTrue('preacher' in fame)
 
     def test_get_artist(self):
-        '''PyLyrics3 can grab all tracks by an artist'''
+        '''PyLyrics3 can grab all tracks by an artist + odd capitalization'''
         l = pylyrics3.get_artist_lyrics('lORDE')
         self.assertTrue('Tennis Court' in l)
         self.assertTrue('you think that' in l['Tennis Court'])
