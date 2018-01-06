@@ -32,6 +32,7 @@ class PyLyrics3(object):
                 False, setting to True will return a dict nested by album
         Returns dict with structure {song: lyrics}: {str: str}
         '''
+        artist = artist.lower()
         url = self._construct_lyricwiki_url(artist)
         try:
             soup = self.__get_soup(url)
@@ -53,7 +54,6 @@ class PyLyrics3(object):
                 # picked up by the link css selector
                 continue
             if artist != song_artist.lower():
-                print(song_artist)
                 continue
             lyrics = self.get_lyrics_from_url(url)
             if lyrics:
