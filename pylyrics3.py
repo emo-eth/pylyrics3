@@ -83,7 +83,7 @@ class PyLyrics3(object):
             page_name = self._decode_lyricwiki(url.split('/')[-1])
             artist = page_name.split(':')[0]
             title = page_name.split(':')[1]
-            print("Ran into an error getting lyrics for ' % s' by %s!"
+            print("Ran into an error getting lyrics for '%s' by %s!"
                   % (title, artist))
             return
 
@@ -145,11 +145,10 @@ class PyLyrics3(object):
         Substitutions are performed as described at
         < http: // lyrics.wikia.com / LyricWiki: Page_Names > .
         '''
-
         words = str_.split()
         newwords = []
         for word in words:
-            newwords.append(word[0].capitalize() + word[1:])
+            newwords.append(word.title())
         str_ = '_'.join(newwords)
         str_ = str_.replace('<', 'Less_Than')
         str_ = str_.replace('>', 'Greater_Than')
