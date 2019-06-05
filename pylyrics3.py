@@ -53,11 +53,11 @@ class PyLyrics3(object):
                 # when a song is a cover, the link to the original artist gets
                 # picked up by the link css selector
                 continue
-            if artist != song_artist.lower():
+            if artist not in song_artist.lower():
                 continue
             lyrics = self.get_lyrics_from_url(url)
             if lyrics:
-                title_to_lyrics[title] = lyrics
+              title_to_lyrics[title] = lyrics
         return title_to_lyrics
 
     def get_song_lyrics(self, artist, title):
@@ -200,9 +200,10 @@ class PyLyrics3(object):
     def __get_artist_song_links(artist_soup):
         '''Given the soup of an artist page, get <a> tags of all tracks'''
         songs = []
-        for link_tag in artist_soup.select('ol li b a'):
-            link = PyLyrics3.__lyric_wiki_url + link_tag.get('href')
-            songs.append(link)
+        for link_tag in artist_soup.select('li b a'):
+            if link_tag.get('href'):
+                link = PyLyrics3.__lyric_wiki_url + link_tag.get('href')
+                songs.append(link)
         return songs
 
     @staticmethod

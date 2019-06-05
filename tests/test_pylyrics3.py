@@ -29,6 +29,18 @@ class TestPyLyrics3(unittest.TestCase):
         l = pylyrics3.get_artist_lyrics('lORDE')
         self.assertTrue('Tennis Court' in l)
         self.assertTrue('you think that' in l['Tennis Court'])
+    
+    def test_singles_and_soundtracks(self):
+        '''Certan artists were throwing a TypeError on a None response, in
+        addition to not including singles and soundtrack sections.'''
+        l = pylyrics3.get_artist_lyrics('troye sivan')
+        self.assertTrue('Strawberries & Cigarettes' in l)
+
+    def test_compound_artist(self):
+        '''Test that collaborative songs ("Artist1 & Artist2") are included '''
+        l = pylyrics3.get_artist_lyrics('bon iver')
+        # typo on lyricwiki :(
+        self.assertTrue('Roslyn' in l.keys() or 'Rosyln' in l.keys())
 
 
 if __name__ == '__main__':
