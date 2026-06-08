@@ -11,7 +11,7 @@ class PyLyrics3(object):
     '''
     Lyric-scraper object.
     '''
-    __lyric_wiki_url = 'http://lyrics.wikia.com'
+    __lyric_wiki_url = 'https://lyrics.fandom.com'
 
     def __init__(self, proxies=None):
         '''
